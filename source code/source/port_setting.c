@@ -21,8 +21,13 @@ void Init_PortA_clock(void){
 	 uint32_t reg_addr = SIM_BASE + 0x1038U;
     *((__IO uint32_t *)reg_addr) |= (1U << 9U);
 }
-
-
+void Init_PortB_clock(void){
+	 uint32_t reg_addr = SIM_BASE + 0x1038U;
+    *((__IO uint32_t *)reg_addr) |= (1U << 10U);
+}
+void Init_LED_PIN(void){
+	Set_Pin_Alt(PORTB,18,1);
+};
 void Init_UART_PIN(void){
 	Init_PortA_clock();
 	Set_Pin_Alt(PORTA,1,2);
@@ -42,4 +47,25 @@ void Init_UART_data_source(void){
 	/* UART0 transmit data source select: UART0_TX(set to 0) and receive data source select: UART0_RX(set to 0) */
 	temp |= SIM_SOPT5_UART0TXSRC(0) | SIM_SOPT5_UART0RXSRC(0) ;
 	SIM->SOPT5 = temp;
+}
+
+void GPIO_PinInit(GPIO_Type *base, uint32_t pin, gpio_config *config)
+{
+
+    if (config->direction == INPUT)
+    {
+        base->PDDR &= ~(1U << pin);
+    }
+    else
+    {
+        if(config->outputlevel==HIGH)
+        	base->PSOR |= (1U << pin);
+        else
+        	base->PCOR |= (1U << pin);
+        base->PDDR |= (1U << pin);
+    }
+}
+
+void GPIO_Toggle(GPIO_Type *base, uint32_t pin){
+	base->PTOR |= (1U << pin);
 }

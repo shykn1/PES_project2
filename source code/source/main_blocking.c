@@ -82,7 +82,7 @@ int main(void)
 	uint8_t ch_rec;
     while (1)
     {
-		UART_RX_RD(DEMO_LPSCI, &ch_rec);
+    	UART_BLOCKING_RX_GETCHAR(DEMO_LPSCI, &ch_rec);
 		UART_BLOCKING_PUTCHAR(DEMO_LPSCI,ch_rec);
     }
 }

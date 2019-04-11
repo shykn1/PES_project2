@@ -9,12 +9,19 @@
 */
 
 #include "UART.h"
-void UART_RX_RD(UART0_Type *base, uint8_t* data){
+
+void UART_BLOCKING_RX_GETCHAR(UART0_Type *base, uint8_t* data){
 	while ((base->S1 & UART0_S1_RDRF_MASK) == 0);
+	*(data) = base->D;
+}
+void UART_RX_GETCHAR(UART0_Type *base, uint8_t* data){
 	*(data) = base->D;
 }
 void UART_TX_RD(UART0_Type *base){
 	while (!(base->S1 & UART0_S1_TDRE_MASK));
+}
+int32_t UART_NONBLOCKING_TX_BUSY(UART0_Type *base){
+	return (((base->C2 & UART0_C2_TCIE_MASK)!=false)?1:0);
 }
 void UART_PUTCHAR(UART0_Type *base, uint8_t data){
 	 base->D = data;
@@ -29,6 +36,13 @@ void UART_BLOCKING_WRITEBLOCK(UART0_Type *base, uint8_t* data, uint32_t length){
 		UART_BLOCKING_PUTCHAR(base, *data);
 		data++;
 	}
+}
+
+void UART_Interrput_enable(UART0_Type *base, Interrput_Mask type){
+	base->C2 |= (uint8_t)type;
+}
+void UART_Interrput_disable(UART0_Type *base, Interrput_Mask type){
+	base->C2 &= ~((uint8_t)type);
 }
 uint8_t UART0_Init(UART0_Type *base, UART_config *config, uint32_t src_clk_rate){
 

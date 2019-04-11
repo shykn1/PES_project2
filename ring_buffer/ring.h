@@ -11,8 +11,8 @@
 *	@date 			Mar 18 2019 
 *	@version  	1.0
 */
-#ifndef RING_H
-#define RING_H
+#ifndef __RING_H__
+#define __RING_H__
 
 #include <stdio.h>
 #include <stdlib.h>
