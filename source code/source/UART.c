@@ -3,33 +3,81 @@
 *	@brief 		UART functions for this project
 *	
 *
-*	@author 		
+*	@author 		Linfeng Li
 *	@date 			March 30 2019 
 *	@version  	1.0
 */
 
 #include "UART.h"
-
+/**
+*	@brief 		Put UART received data to buffer (blocking)
+*	
+*	@param		UART0_Type *base	UART source	
+*				uint8_t* data		received data buffer 
+*	
+*/
 void UART_BLOCKING_RX_GETCHAR(UART0_Type *base, uint8_t* data){
 	while ((base->S1 & UART0_S1_RDRF_MASK) == 0);
 	*(data) = base->D;
 }
+/**
+*	@brief 		Put UART received data to buffer (nonblocking)
+*	
+*	@param		UART0_Type *base	UART source	
+*				uint8_t* data		received data buffer 
+*	
+*/
 void UART_RX_GETCHAR(UART0_Type *base, uint8_t* data){
 	*(data) = base->D;
 }
+/**
+*	@brief 		Block the program until all UART transfered data are read (blocking)
+*	
+*	@param		UART0_Type *base	UART source	
+*	
+*/
 void UART_TX_RD(UART0_Type *base){
 	while (!(base->S1 & UART0_S1_TDRE_MASK));
 }
+/**
+*	@brief 		Check the UART transfered procedure complete (nonblocking)
+*	
+*	@param		UART0_Type *base	UART source	
+*	
+*	@return		0	process complete
+*				1	process incomplete
+*/
 int32_t UART_NONBLOCKING_TX_BUSY(UART0_Type *base){
 	return (((base->C2 & UART0_C2_TCIE_MASK)!=false)?1:0);
 }
+/**
+*	@brief 		Put single character into UART buffer (nonblocking)
+*	
+*	@param		UART0_Type *base	UART source	
+*				uint8_t* data		data need to be put to UART buffer 
+*	
+*/
 void UART_PUTCHAR(UART0_Type *base, uint8_t data){
 	 base->D = data;
 }
+/**
+*	@brief 		Put single character into UART buffer after UART transfered procedure complete (blocking)
+*	
+*	@param		UART0_Type *base	UART source	
+*				uint8_t* data		data need to be put to UART buffer 
+*	
+*/
 void UART_BLOCKING_PUTCHAR(UART0_Type *base, uint8_t data){
 	UART_TX_RD(base);
 	UART_PUTCHAR(base,data);
 }
+/**
+*	@brief 		Put certain length characters into UART buffer after UART transfered procedure complete (blocking)
+*	
+*	@param		UART0_Type *base	UART source	
+*				uint8_t* data		data need to be put to UART buffer 
+*				uint32_t length		length of data			
+*/
 void UART_BLOCKING_WRITEBLOCK(UART0_Type *base, uint8_t* data, uint32_t length){
 	while(length!=0){
 		length--;
@@ -37,13 +85,34 @@ void UART_BLOCKING_WRITEBLOCK(UART0_Type *base, uint8_t* data, uint32_t length){
 		data++;
 	}
 }
-
+/**
+*	@brief 		Enable the UART interrupt 
+*	
+*	@param		UART0_Type *base	UART source	
+*				Interrput_Mask type	Type of interrupt		
+*/
 void UART_Interrput_enable(UART0_Type *base, Interrput_Mask type){
 	base->C2 |= (uint8_t)type;
 }
+/**
+*	@brief 		Disable the UART interrupt 
+*	
+*	@param		UART0_Type *base		UART source	
+*				Interrput_Mask type		Type of interrupt		
+*/
 void UART_Interrput_disable(UART0_Type *base, Interrput_Mask type){
 	base->C2 &= ~((uint8_t)type);
 }
+/**
+*	@brief 		Initialize the UART  
+*	
+*	@param		UART0_Type *base		UART source	
+*				UART_config *config		Configure of UART
+*				uint32_t src_clk_rate	Clock frequency
+*	@return		0	procedure complete
+*				-1	ERROR:Unacceptable baud rate difference of more than 3%
+*						
+*/
 uint8_t UART0_Init(UART0_Type *base, UART_config *config, uint32_t src_clk_rate){
 
 

@@ -27,7 +27,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+ /**
+*	@file 			main_nonblocking.c
+*	@brief 			main function in the blocking implement
+*	
+*	@author 			Linfeng Li;
+*	@date 			Apr 11 2019 
+*	@version  	1.0
+*/
 /*******************************************************************************
  * Includes
  ******************************************************************************/
