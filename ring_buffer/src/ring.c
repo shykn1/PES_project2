@@ -11,7 +11,7 @@
 *	@version  	1.0
 */
 
-#include "ring.h"
+#include "../inc/ring.h"
 #include <stdio.h>
 #include <stdlib.h>
 

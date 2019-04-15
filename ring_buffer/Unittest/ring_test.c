@@ -15,7 +15,7 @@
 #include <string.h>
 #include "CUnit/Basic.h"
 #include <CUnit/CUnit.h>
-#include "ring.h"
+#include "../inc/ring.h"
 
 
 /* The suite initialization function.

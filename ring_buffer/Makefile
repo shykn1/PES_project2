@@ -11,8 +11,9 @@ HFILES=
 
 
 
-OFILES_REAGULAR= ring.o ring_test.o
-OFILES_RANDOMIZED= ring.o ring_test_random.o
+OFILES_REAGULAR= ./src/ring.o ./Unittest/ring_test.o
+OFILES_RANDOMIZED= ./src/ring.o ./Unittest/ring_test_random.o
+
 SRCS= ${HFILES} ${CFILES}
 
 
@@ -22,6 +23,7 @@ all:	ring ring_ran
 clean:
 	-rm -f *.o *.d 
 	-rm -f ring
+	-rm -f ring_ran
 
 distclean:
 	-rm -f *.o *.d
@@ -33,10 +35,12 @@ ring: $(OFILES_REAGULAR)
 ring_ran: $(OFILES_RANDOMIZED)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^ -lcunit
 
-%.o:%.c
-	$(CC) $(CFLAGS) -c $<
+src\%.o:src\%.c
+	$(CC) $(CFLAGS)     -c   $<
 
-.cpp.o:
-	$(CC) $(CFLAGS) -c $<
+Unittest\%.o:Unittest\%.c
+	$(CC) $(CFLAGS)     -c   $<
+
+
 
 

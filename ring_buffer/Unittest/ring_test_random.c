@@ -19,7 +19,7 @@
 #include <string.h>
 #include "CUnit/Basic.h"
 #include <CUnit/CUnit.h>
-#include "ring.h"
+#include "../inc/ring.h"
 #include <time.h>
 #define BUFFER_SIZE (100)
 #define TOTAL_LOOP (8000)
