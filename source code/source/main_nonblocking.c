@@ -2,9 +2,9 @@
  /**
 *	@file 			main_nonblocking.c
 *	@brief 			main function in the nonblocking implement
-*	
+*
 *	@author 			Linfeng Li;
-*	@date 			Apr 11 2019 
+*	@date 			Apr 11 2019
 *	@version  	1.0
 */
 
@@ -19,9 +19,7 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define DEMO_LPSCI UART0
-#define DEMO_LPSCI_CLKSRC kCLOCK_CoreSysClk
-#define DEMO_LPSCI_CLK_FREQ CLOCK_GetFreq(kCLOCK_CoreSysClk)
+
 #define FLL_OUTPUT_CLK_RATE (47972352)
 #define DELAY_CNT (100000)
 /*******************************************************************************
@@ -31,8 +29,6 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-uint8_t txbuff[] = "LPSCI polling example\r\nSend back received data\r\n";
-uint8_t rxbuff[20] = {0};
 extern uint32_t SystemCoreClock;
 static UART_config config_UART ={
 		.Baudrate = 115200,
@@ -57,22 +53,22 @@ void UART0_IRQHandler(void)
 {
 	uint8_t character;
 	int32_t status;
-	if((DEMO_LPSCI->S1 & UART0_S1_RDRF_MASK) != false){
-		UART_RX_GETCHAR(DEMO_LPSCI,&character);
+	if((OPENSDA_UART->S1 & UART0_S1_RDRF_MASK) != false){
+		UART_RX_GETCHAR(OPENSDA_UART,&character);
 		insert(RxRingBuffer,character);
 	}
 
 
-	if((DEMO_LPSCI->S1 & UART0_S1_TDRE_MASK) != false && ((DEMO_LPSCI->C2 & UART0_C2_TCIE_MASK)!=false)){
+	if((OPENSDA_UART->S1 & UART0_S1_TDRE_MASK) != false && ((OPENSDA_UART->C2 & UART0_C2_TCIE_MASK)!=false)){
 		status = extract(TxRingBuffer,&character);
 		if(status == RING_EMPTY){
-			UART_Interrput_disable(DEMO_LPSCI, TxDataRegEmptyInterrupt);
+			UART_Interrput_disable(OPENSDA_UART, TxDataRegEmptyInterrupt);
 		}
 		else if(status != NULL_RING_PTR){
-			UART_PUTCHAR(DEMO_LPSCI,character);
+			UART_PUTCHAR(OPENSDA_UART,character);
 		}
 		else{
-			UART_Interrput_disable(DEMO_LPSCI, TxDataRegEmptyInterrupt);
+			UART_Interrput_disable(OPENSDA_UART, TxDataRegEmptyInterrupt);
 		}
 	}
 }
@@ -98,16 +94,16 @@ int main(void)
     	while(1);
     RxRingBuffer = TxRingBuffer;
     ///////////////////////////////
-    UART0_Init(DEMO_LPSCI, &config_UART, FLL_OUTPUT_CLK_RATE);
+    UART0_Init(OPENSDA_UART, &config_UART, FLL_OUTPUT_CLK_RATE);
     uart_num=sprintf(uplink_buffer,"non-Blocking part\r\n");
-    UART_BLOCKING_WRITEBLOCK(DEMO_LPSCI,uplink_buffer,uart_num);
-    UART_Interrput_enable(DEMO_LPSCI, RxDataRegFullInterrupt);
+    UART_BLOCKING_WRITEBLOCK(OPENSDA_UART,uplink_buffer,uart_num);
+    UART_Interrput_enable(OPENSDA_UART, RxDataRegFullInterrupt);
 
     NVIC_EnableIRQ(UART0_IRQn);
     while (1)
     {
-    	if(   (!UART_NONBLOCKING_TX_BUSY(DEMO_LPSCI)) && (  (entries(TxRingBuffer) != 0) )   ){
-    		UART_Interrput_enable(DEMO_LPSCI, TxDataRegEmptyInterrupt);
+    	if(   (!UART_NONBLOCKING_TX_BUSY(OPENSDA_UART)) && (  (entries(TxRingBuffer) != 0) )   ){
+    		UART_Interrput_enable(OPENSDA_UART, TxDataRegEmptyInterrupt);
     	}
     	toggle_cnt++;
     	if(toggle_cnt==DELAY_CNT){

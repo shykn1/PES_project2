@@ -11,8 +11,6 @@
  * Definitions
  ******************************************************************************/
 
-#define DEMO_LPSCI_CLKSRC kCLOCK_CoreSysClk
-#define DEMO_LPSCI_CLK_FREQ CLOCK_GetFreq(kCLOCK_CoreSysClk)
 #define FLL_OUTPUT_CLK_RATE (47972352)
 #define DELAY_CNT (100000)
 /*******************************************************************************
@@ -22,8 +20,6 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-uint8_t txbuff[] = "LPSCI polling example\r\nSend back received data\r\n";
-uint8_t rxbuff[20] = {0};
 extern uint32_t SystemCoreClock;
 static UART_config config_UART ={
 		.Baudrate = 115200,

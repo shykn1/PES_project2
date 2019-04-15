@@ -120,77 +120,66 @@ uint8_t UART0_Init(UART0_Type *base, UART_config *config, uint32_t src_clk_rate)
     uint16_t sbr = 0;
     uint16_t sbrTemp;
     uint32_t osr = 0;
-    uint32_t osrTemp;
-    uint32_t tempDiff, calculatedBaud, baudDiff;
+    uint32_t osr_Temp;
+    int32_t Diff_temp;
+    uint32_t calculatedBaud, baudDiff;
 
-    /* This LPSCI instantiation uses a slightly different baud rate calculation
-     * The idea is to use the best OSR (over-sampling rate) possible
-     * Note, OSR is typically hard-set to 16 in other LPSCI instantiations
-     * loop to find the best OSR value possible, one that generates minimum baudDiff
-     * iterate through the rest of the supported values of OSR */
-
+    //calculate the  optimized osr and sr setting
     baudDiff = config->Baudrate;
-    for (osrTemp = 4; osrTemp <= 32; osrTemp++)
+    for (osr_Temp = 4; osr_Temp <= 32; osr_Temp++)
     {
-        /* calculate the temporary sbr value   */
-        sbrTemp = (src_clk_rate / (config->Baudrate * osrTemp));
-        /* set sbrTemp to 1 if the sourceClockInHz can not satisfy the desired baud rate */
+
+        sbrTemp = (src_clk_rate / (config->Baudrate * osr_Temp));
         if (sbrTemp == 0)
         {
             sbrTemp = 1;
         }
-        /* Calculate the baud rate based on the temporary OSR and SBR values */
-        calculatedBaud = (src_clk_rate / (osrTemp * sbrTemp));
-
-        tempDiff = calculatedBaud - config->Baudrate;
-
-        /* Select the better value between srb and (sbr + 1) */
-        if (tempDiff > (config->Baudrate - (src_clk_rate / (osrTemp * (sbrTemp + 1)))))
+        calculatedBaud = (src_clk_rate / (osr_Temp * sbrTemp));
+        Diff_temp = (int32_t)(calculatedBaud - config->Baudrate);
+        if(Diff_temp<0)
+        	Diff_temp = -Diff_temp;
+        if (Diff_temp > (int32_t)((config->Baudrate - (src_clk_rate / (osr_Temp * (sbrTemp + 1)))))   )
         {
-            tempDiff = config->Baudrate - (src_clk_rate / (osrTemp * (sbrTemp + 1)));
+            Diff_temp = config->Baudrate - (src_clk_rate / (osr_Temp * (sbrTemp + 1)));
             sbrTemp++;
         }
 
-        if (tempDiff <= baudDiff)
+        if (Diff_temp <= (int32_t)baudDiff)
         {
-            baudDiff = tempDiff;
-            osr = osrTemp; /* update and store the best OSR value calculated*/
-            sbr = sbrTemp; /* update store the best SBR value calculated*/
+            baudDiff = (uint32_t)Diff_temp;
+            osr = osr_Temp;
+            sbr = sbrTemp;
         }
     }
 
-    /* next, check to see if actual baud rate is within 3% of desired baud rate
-     * based on the best calculate OSR value */
+
     if (baudDiff > ((config->Baudrate / 100) * 3))
     {
-        /* Unacceptable baud rate difference of more than 3%*/
         return (-1);
     }
 
 
-    /* enable the UART0 clock by disabling the corresponding clock gate */
+    //enable the UART0 clock by disabling the corresponding clock gate
     SIM->SCGC4= (SIM->SCGC4 & ~SIM_SCGC4_UART0_MASK) | SIM_SCGC4_UART0(true);
 
 
-    /* Disable TX RX before setting. */
+    // Disable TX RX before
     base->C2 &= ~(UART0_C2_TE_MASK | UART0_C2_RE_MASK);
 
-    /* Acceptable baud rate */
-    /* Check if OSR is between 4x and 7x oversampling*/
-    /* If so, then "BOTHEDGE" sampling must be turned on*/
+    //OSR 4x and 7x oversampling then Both edge sampling should be used
     if ((osr > 3) && (osr < 8))
     {
         base->C5 |= UART0_C5_BOTHEDGE_MASK;
     }
 
-    /* program the osr value (bit value is one less than actual value)*/
+    //program the osr value (bit value is one less than actual value)
     base->C4 = ((base->C4 & ~UART0_C4_OSR_MASK) | (osr - 1));
 
-    /* program the sbr (divider) value obtained above*/
+    //program the sbr (divider) value obtained above
     base->BDH = ((base->C4 & ~UART0_BDH_SBR_MASK) | (uint8_t)(sbr >> 8));
     base->BDL = (uint8_t)sbr;
 
-    /* set parity mode */
+    //set parity mode *
     pre_val = base->C1 & ~(UART0_C1_PE_MASK | UART0_C1_PT_MASK | UART0_C1_M_MASK);
 
     if (config->ParityMode != ParityDisabled )
@@ -200,12 +189,12 @@ uint8_t UART0_Init(UART0_Type *base, UART_config *config, uint32_t src_clk_rate)
 
     base->C1 = pre_val;
 
-    /* set stop bit per char */
+    //set stop bit per char
     base->BDH &= ~UART0_BDH_SBNS_MASK;
     base->BDH |= UART0_BDH_SBNS((uint8_t)config->Stopbit);
 
 
-    /* Enable TX/RX base on configure structure. */
+    //Enable TX/RX base on configure structure.
     pre_val = base->C2;
 
     if (config->Txenable)

@@ -15,4 +15,10 @@
 #include "stdint.h"
 #include <stdio.h>
 #include <stdlib.h>
+#define TIMEOUT_TICK (50)
+#define MAX_REPORT_CHAR (1000)
+#define OPENSDA_UART UART0
+#define MOD (2147483648U)
+#define MULT (1103515245U)
+#define INC (12345U)
 #endif

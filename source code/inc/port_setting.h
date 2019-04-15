@@ -1,6 +1,6 @@
 /**
 *	@file 			common.h
-*	@brief 		GPIO setting for this project
+*	@brief 		Some common functions for this project
 *	
 *
 *	@author 		
