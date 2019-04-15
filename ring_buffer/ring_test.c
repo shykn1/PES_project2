@@ -50,6 +50,7 @@ void test_full_empty(void)
 	char data;
 	
 	//test without any data in the buffer
+	//extract them all out after
 	CU_ASSERT(entries(ring)==0);
 	for(int i=0;i<5;i++){
 		if(entries(ring)<ring->Length){
@@ -72,6 +73,7 @@ void test_full_empty(void)
 	
 	
 	//test with one byte data in the buffer 
+	//extract them all out after
 	CU_ASSERT(entries(ring)==0);
 	CU_ASSERT((insert(ring,123)!=-2));
 	for(int i=0;i<6;i++){
@@ -93,18 +95,27 @@ void test_full_empty(void)
 		else
 			CU_ASSERT((extract(ring,&data)==-2));
 	}
+	//test whether there is no data inside
 	CU_ASSERT(entries(ring)==0);
 	
+	
+	//add some offse to the input and output pointer
 	CU_ASSERT((insert(ring,0)!=-2));
 	CU_ASSERT((extract(ring,&data)!=-2));
 	CU_ASSERT((insert(ring,0)!=-2));
 	CU_ASSERT((extract(ring,&data)!=-2));
+	
+	//insert data: 10,11,12,13,14
 	for(int i=0;i<5;i++){
 		CU_ASSERT((insert(ring,i+10)!=-2));
 	}
 	printf("\nIni:%d Outi:%d\n",ring->Ini,ring->Outi);
+	//resize the buffer with 6 bytes of size
 	CU_ASSERT(resize(ring,6)==0);
 	printf("\nIni:%d Outi:%d\n",ring->Ini,ring->Outi);
+	
+	//test whether there is still 5 elements inside
+	//extract them all out after
 	CU_ASSERT(entries(ring)==5);
 	CU_ASSERT(ring->Full == 0);
 	for(int i=0;i<6;i++){
@@ -118,20 +129,27 @@ void test_full_empty(void)
 	}
 	
 	
-	
+	//test whether there is no data inside
 	CU_ASSERT(entries(ring)==0);
+	//add some offse to the input and output pointer
 	CU_ASSERT((insert(ring,0)!=-2));
 	CU_ASSERT((extract(ring,&data)!=-2));
+	
+	
+	//insert data: 51,52,53,54,55,56
 	for(int i=0;i<6;i++){
 		CU_ASSERT((insert(ring,i+51)!=-2));
 	}
 	CU_ASSERT(ring->Full == 1);
 	CU_ASSERT(entries(ring)==6);
 	printf("\nIni:%d Outi:%d\n",ring->Ini,ring->Outi);
+	//resize the buffer with 4 bytes of size
 	CU_ASSERT(resize(ring,4)==0);
+	//test whether there is only 4 elements inside
 	CU_ASSERT(entries(ring)==4);
 	CU_ASSERT(ring->Full == 1);
-
+	
+	//test whether only lastest data is maintained
 	for(int i=0;i<6;i++){
 		if(entries(ring)!=0){
 			CU_ASSERT((extract(ring,&data)!=-2));
